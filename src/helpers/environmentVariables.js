@@ -1,8 +1,8 @@
-// const logger = require('../helpers/logger');
-
 module.exports = ({
-    PORT: '3000',
+    PORT: '3000' || process.env.PORT,
     GITHUB_BASE_URL: 'https://api.github.com/repos',
-    // SERVICE_NAME: ${process.env.SERVICE_NAME},
-    // KEEP_ALIVE_TIMEOUT: ${process.env.KEEP_ALIVE_TIMEOUT}
+    SERVICE_NAME: 'github-tree-builder',
+    KEEP_ALIVE_TIMEOUT: 50000,
+    NEW_CONNECTIONS_TIMEOUT: 7500,
+    SHUTDOWN_TIMEOUT: 60000
 });

@@ -72,7 +72,7 @@ module.exports = async(req, res, next) => {
   if (!headSHA)  throw new Error('Could not extract the tree head SHA');
   
   treeArray = await getEntireTree(owner_name, repo_name, headSHA);
-  if ([].length <= 0) throw new Error('Could not extract the tree array');
+  if (treeArray.length <= 0) throw new Error('Could not extract the tree array');
 
   const outputJsonTree = buildTreeFileStructure(treeArray);
   return outputJsonTree;

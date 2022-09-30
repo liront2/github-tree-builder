@@ -1,10 +1,8 @@
 'use strict';
 
 const axios = require('axios');
-const { GITHUB_BASE_URL } = require('../config/environmentVariables');
 
-// TODO: temp
-const tree = require('../../test');
+const { GITHUB_BASE_URL } = require('../helpers/environmentVariables');
 
 const instance = axios.create({
   baseURL: GITHUB_BASE_URL,
@@ -12,27 +10,17 @@ const instance = axios.create({
 });
 
 const getTreeHeadSHA = async(ownerName, repoName) => {
-  try {
     const response = await instance.get(`${ownerName}/${repoName}/branches/master`);
     const headSHA = response?.data?.commit?.commit?.tree?.sha;
     if (headSHA) return headSHA;
-  } catch (error) {
-    throw new Error('tree head SHA could not be fetched' + JSON.stringify(error));
-  }
 }
 
-// TODO: optimize
+// TODO: rate-limit solution?
 const getEntireTree = async(ownerName, repoName, headSHA) => {
-  try {
-    const response = await instance.get(`${ownerName}/${repoName}/git/trees/${headSHA}?recursive=true`);
-    const tree = response?.data?.tree;
-    if (tree) return tree
-  } catch (error) {
-    throw new Error('We encountered a problem fetching the tree from Github' + JSON.stringify(error));
-  }
+  const response = await instance.get(`${ownerName}/${repoName}/git/trees/${headSHA}?recursive=true`);
+  const tree = response?.data?.tree;
+  if (tree) return tree
 }
-
-
 
 function updateObject(target, toFindDir, value){
   // for the target object, find the toFindDir key, and there set the value
@@ -57,7 +45,7 @@ const buildTreeFileStructure = (tree) => {
     (acc, currentValue) => {
       const path = currentValue.path;
       if (path.includes('/')) {
-        // sub folders building
+        // sub folders and files building
         const splitPath = path.split('/');
         const name = splitPath.pop(); // pop the file name in the end, leave dir path
         const findDir = splitPath.pop(); // pop the deepest folder
@@ -79,15 +67,11 @@ const buildTreeFileStructure = (tree) => {
 
 module.exports = async(req, res, next) => {
   const { owner_name, repo_name } = req.params;
-  try {
     const headSHA = await getTreeHeadSHA(owner_name, repo_name);
     if (headSHA) {
       const treeArray = await getEntireTree(owner_name, repo_name, headSHA);
       const outputJsonTree = buildTreeFileStructure(treeArray);
       return outputJsonTree;
     }
-    throw new Error('No tree head was found')
-  } catch (err) {
-    return next(err);
-  }
+    return {}
 }

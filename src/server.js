@@ -1,7 +1,7 @@
 // const gracefulShutdown = require('./helpers/graceful-shutdown');
 // const logger = require('./helpers/logger');
 const _app = require('./app');
-const { PORT, SERVER_KEEP_ALIVE } = require('./config/environmentVariables');
+const { PORT, SERVER_KEEP_ALIVE } = require('./helpers/environmentVariables');
 
 _app().then(app => {
   const server = app.listen(PORT, function() {
@@ -11,6 +11,14 @@ _app().then(app => {
   server.keepAliveTimeout = SERVER_KEEP_ALIVE;
 
   // Graceful Shutdown
+  // gracefulShutdown.registerShutdownEvent({
+  //   server: server,
+  //   newConnectionsTimeout: serviceConfig.newConnectionsTimeout,
+  //   shutdownTimeout: serviceConfig.shutdownTimeout,
+  //   events: ['SIGINT', 'SIGTERM'],
+  //   logger: logger,
+  //   callback: gracefulShutdownCallback
+  // });
   // gracefulShutdown.register(server, ['SIGTERM', 'SIGINT']);
 }).catch(function(error) {
   console.error('Could not start Github tree builder service', error);

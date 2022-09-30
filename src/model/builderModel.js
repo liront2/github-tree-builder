@@ -26,15 +26,15 @@ function updateObject(target, toFindDir, value){
   // for the target object, find the toFindDir key, and there set the value
     if (target.hasOwnProperty(toFindDir) && typeof(value) === typeof(target[toFindDir])) {
       // update value if dir was found
-      target[toFindDir] = {
-        ...target[toFindDir],
+      target[toFindDir].tree = {
+        ...target[toFindDir].tree,
         ...value
       };
     } else {
       for (const subDir in target) {
-        if (!target[subDir].type) {
+        if (target[subDir].type === 'tree') {
           // dirs are just props to more objects, and have no type
-          updateObject(target[subDir], toFindDir, value)
+          updateObject(target[subDir].tree, toFindDir, value)
         }
       }
     }
@@ -49,13 +49,23 @@ const buildTreeFileStructure = (tree) => {
         const splitPath = path.split('/');
         const name = splitPath.pop(); // pop the file name in the end, leave dir path
         const findDir = splitPath.pop(); // pop the deepest folder
-        updateObject(acc, findDir, { [name]: currentValue.type === 'tree' ? {} : currentValue })
+        updateObject(acc, findDir, { [name]: currentValue.type === 'tree'
+            ? {
+              ...currentValue,
+              tree: {}
+            }
+            : currentValue })
         return acc;
       } else {
         // root folder building
         return {
           ...acc,
-          [path]: currentValue.type === 'tree' ? {} : currentValue
+          [path]: currentValue.type === 'tree'
+            ? {
+             ...currentValue,
+              tree: {}
+            }
+            : currentValue
         }
       }
     },

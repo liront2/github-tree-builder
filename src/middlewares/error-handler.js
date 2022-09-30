@@ -1,4 +1,5 @@
 const { AxiosError } = require('axios');
+const logger = require('../helpers/logger');
 
 const {
   NOT_FOUND, INTERNAL_SERVER_ERROR,
@@ -13,7 +14,8 @@ module.exports = {
 
 function handleError(error, req, res, next) {
   let responseBody, statusCode;
-
+  
+  logger.error(error.message);
   if (error instanceof AxiosError) {
     // integration errors with Github
     if (error.response?.status === NOT_FOUND) {
@@ -25,6 +27,9 @@ function handleError(error, req, res, next) {
       responseBody = prepareErrorResponse(GATEWAY_TIMEOUT, getStatusText(GATEWAY_TIMEOUT));
       statusCode = GATEWAY_TIMEOUT;
     }
+  } else {
+    responseBody = prepareErrorResponse(INTERNAL_SERVER_ERROR, error.message);
+    statusCode = INTERNAL_SERVER_ERROR;
   }
   res.status(statusCode);
   return res.json(responseBody);

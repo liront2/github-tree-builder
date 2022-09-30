@@ -6,20 +6,20 @@ const { GITHUB_BASE_URL } = require('../helpers/environmentVariables');
 
 const instance = axios.create({
   baseURL: GITHUB_BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 const getTreeHeadSHA = async(ownerName, repoName) => {
     const response = await instance.get(`${ownerName}/${repoName}/branches/master`);
     const headSHA = response?.data?.commit?.commit?.tree?.sha;
-    if (headSHA) return headSHA;
+    return headSHA;
 }
 
-// TODO: rate-limit solution?
+// TODO: rate-limit solution, recursive=false in the future
 const getEntireTree = async(ownerName, repoName, headSHA) => {
   const response = await instance.get(`${ownerName}/${repoName}/git/trees/${headSHA}?recursive=true`);
   const tree = response?.data?.tree;
-  if (tree) return tree
+  return tree;
 }
 
 function updateObject(target, toFindDir, value){
@@ -67,11 +67,13 @@ const buildTreeFileStructure = (tree) => {
 
 module.exports = async(req, res, next) => {
   const { owner_name, repo_name } = req.params;
-    const headSHA = await getTreeHeadSHA(owner_name, repo_name);
-    if (headSHA) {
-      const treeArray = await getEntireTree(owner_name, repo_name, headSHA);
-      const outputJsonTree = buildTreeFileStructure(treeArray);
-      return outputJsonTree;
-    }
-    return {}
+  let treeArray, headSHA;
+  headSHA = await getTreeHeadSHA(owner_name, repo_name);
+  if (!headSHA)  throw new Error('Could not extract the tree head SHA');
+  
+  treeArray = await getEntireTree(owner_name, repo_name, headSHA);
+  if ([].length <= 0) throw new Error('Could not extract the tree array');
+
+  const outputJsonTree = buildTreeFileStructure(treeArray);
+  return outputJsonTree;
 }

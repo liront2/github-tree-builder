@@ -1,5 +1,5 @@
 ## Service goal
-The service goal is to return a Github repo, as a file tree with hierarchy.
+The service goal is server a GET API, which returns a Github repo, as a file tree with hierarchy.
 
 ## How to start
 - `npm i` - to install dependencies

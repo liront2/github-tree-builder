@@ -22,24 +22,6 @@ const getTree = async(ownerName, repoName, headSHA) => {
   return tree;
 }
 
-function updateObject(target, toFindDir, value){
-  // for the target object, find the toFindDir key, and there set the value
-    if (target.hasOwnProperty(toFindDir) && typeof(value) === typeof(target[toFindDir])) {
-      // update value if dir was found
-      target[toFindDir].tree = {
-        ...target[toFindDir].tree,
-        ...value
-      };
-    } else {
-      for (const subDir in target) {
-        if (target[subDir].type === 'tree') {
-          // dirs are just props to more objects, and have no type
-          updateObject(target[subDir].tree, toFindDir, value)
-        }
-      }
-    }
-}
-
 const buildTreeFileStructure = async (owner, repo, tree, output) => {
 
   for (let obj of tree) {

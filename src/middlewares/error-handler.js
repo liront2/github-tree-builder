@@ -27,6 +27,9 @@ function handleError(error, req, res, next) {
       responseBody = prepareErrorResponse(GATEWAY_TIMEOUT, getStatusText(GATEWAY_TIMEOUT));
       statusCode = GATEWAY_TIMEOUT;
     }
+    // any other issue with Github, when we have a response and a status
+    responseBody = prepareErrorResponse(GATEWAY_TIMEOUT, error.response.statusText);
+    statusCode = GATEWAY_TIMEOUT;
   } else {
     responseBody = prepareErrorResponse(INTERNAL_SERVER_ERROR, error.message);
     statusCode = INTERNAL_SERVER_ERROR;

@@ -47,14 +47,17 @@ const buildTreeFileStructure = async (owner, repo, tree, output) => {
   const promises = []
   for (let obj of tree) {
     if (obj.type === 'tree') {
-      output[obj.path] = { ...obj, tree: {} };
+      output[obj.path] = { ...obj, tree: {} }
       promises.push(buildStructurePromise(owner, repo, obj, output[obj.path].tree));
-      await Promise.all(promises)
+      // await Promise.all(promises)
     } else {
       // blob
       output[obj.path] = obj;
     }
   }
+  // TODO: put here to be concurrent
+  await Promise.all(promises)
+  
   return output;
 }
 
